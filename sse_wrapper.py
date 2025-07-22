@@ -33,9 +33,9 @@ class MCPBridge:
         env = os.environ.copy()
         env['HUBSPOT_ACCESS_TOKEN'] = os.getenv('HUBSPOT_ACCESS_TOKEN', '')
         
-        # Start the MCP server using the Python module
+        # Start the MCP server using the installed command
         self.process = subprocess.Popen(
-            ['python', '-m', 'mcp_server_hubspot'],
+            ['mcp-server-hubspot'],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
