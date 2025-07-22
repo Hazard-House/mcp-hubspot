@@ -1,0 +1,40 @@
+# Use Python base image
+FROM python:3.10-slim-bookworm
+
+# Install the project into `/app`
+WORKDIR /app
+
+# Copy the entire project
+COPY . /app
+
+# Install the package
+RUN pip install --no-cache-dir .
+
+# Install SSE wrapper dependencies
+COPY requirements-wrapper.txt /app/
+RUN pip install --no-cache-dir -r requirements-wrapper.txt
+
+# Create models directory
+RUN mkdir -p /app/models
+
+# Pre-download models
+RUN python -c "from sentence_transformers import SentenceTransformer; \
+    model = SentenceTransformer('all-MiniLM-L6-v2'); \
+    model.save('/app/models/all-MiniLM-L6-v2')"
+
+# Copy the SSE wrapper
+COPY sse_wrapper.py /app/
+
+# Create storage directory for FAISS
+RUN mkdir -p /storage
+
+# Expose port for Railway
+EXPOSE 8000
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV STORAGE_DIR=/storage
+ENV SENTENCE_TRANSFORMERS_HOME=/app/models
+
+# Run the SSE wrapper instead of the MCP server directly
+CMD ["python", "sse_wrapper.py"]
